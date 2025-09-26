@@ -1,10 +1,11 @@
 package com.lojaadocao.dao;
 
 import com.lojaadocao.model.Animal;
+import com.lojaadocao.model.Cachorro;
+import com.lojaadocao.model.Gato;
 import com.lojaadocao.util.ConexaoFactory;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,10 +149,6 @@ public class AnimalDAO {
         }
     }
 
-    /**
-     * Tenta adotar um animal: só funciona se o status atual for 'DISPONIVEL'.
-     * Retorna true se a atualização ocorreu (animal adotado), false caso contrário.
-     */
     public boolean adotar(int animalId, int donoId) {
         String sql = "UPDATE animais SET status = ?, dono_id = ?, data_adocao = ?, updated_at = ? WHERE id = ? AND status = 'DISPONIVEL'";
         try (Connection conn = ConexaoFactory.getConnection();
@@ -171,14 +168,25 @@ public class AnimalDAO {
         }
     }
 
-    // --- mapeador
     private Animal mapRowToAnimal(ResultSet rs) throws SQLException {
-        Animal a = new Animal();
+        String tipo = rs.getString("tipo");
+        Animal a;
+
+        switch (tipo.toUpperCase()) {
+            case "CACHORRO":
+                a = new Cachorro();
+                break;
+            case "GATO":
+                a = new Gato();
+                break;
+            default:
+                throw new RuntimeException("Tipo de animal desconhecido: " + tipo);
+        }
+
         a.setId(rs.getInt("id"));
         a.setNome(rs.getString("nome"));
         int idade = rs.getInt("idade");
         if (!rs.wasNull()) a.setIdade(idade);
-        a.setTipo(rs.getString("tipo"));
         a.setRaca(rs.getString("raca"));
         a.setSexo(rs.getString("sexo"));
         a.setPorte(rs.getString("porte"));
@@ -202,4 +210,6 @@ public class AnimalDAO {
 
         return a;
     }
+
+
 }
