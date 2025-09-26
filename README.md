@@ -60,6 +60,5 @@ A API subirá em http://localhost:8080
 - **POST /donos** → Cadastrar um dono  
 - **GET /donos** → Listar todos os donos  
 - **GET /donos/{id}** → Buscar um dono por ID  
-- **GET /donos/cpf/{cpf}** → Buscar dono pelo CPF  
 - **PUT /donos/{id}** → Atualizar informações do dono  
 - **DELETE /donos/{id}** → Excluir dono 
