@@ -6,19 +6,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Dono {
+public class Owner {
     private Integer id;
-    private String nome;
+    private String name;
     private String cpf;
     private String email;
-    private LocalDateTime dataNascimento;
-    private String telefone;
-    private String endereco;
-
+    private LocalDateTime birthDate;
+    private String phone;
+    private String address;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

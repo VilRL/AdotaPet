@@ -3,7 +3,11 @@ package com.lojaadocao.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.lojaadocao.handle.*;
+import com.lojaadocao.handler.*;
+import com.lojaadocao.handler.AdoptionHandler.AdoptAnimalHandler;
+import com.lojaadocao.handler.AdoptionHandler.ListAvailableHandler;
+import com.lojaadocao.handler.AnimalHandler.CreateAnimalHandler;
+import com.lojaadocao.handler.AnimalHandler.ListAnimalsHandler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -12,7 +16,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class AnimalController implements HttpHandler {
-    private final HandleDispatcher dispatcher = new HandleDispatcher();
+    private final HandlerDispatcher dispatcher = new HandlerDispatcher();
     private final ObjectMapper objectMapper;
 
     public AnimalController() {
@@ -20,10 +24,10 @@ public class AnimalController implements HttpHandler {
         this.objectMapper.registerModule(new JavaTimeModule());
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        dispatcher.registrar("GET", "/animais", new ListarAnimaisHandle());
-        dispatcher.registrar("POST", "/animais", new CriarAnimalHandle());
-        dispatcher.registrar("GET", "/animais/disponiveis", new ListarDisponiveisHandle());
-        dispatcher.registrar("POST", "/animais/adotar", new AdotarAnimalHandle());
+        dispatcher.register("GET", "/animals", new ListAnimalsHandler());
+        dispatcher.register("POST", "/animals", new CreateAnimalHandler());
+        dispatcher.register("GET", "/animals/available", new ListAvailableHandler());
+        dispatcher.register("POST", "/animals/adopt", new AdoptAnimalHandler());
     }
 
     @Override
@@ -31,21 +35,21 @@ public class AnimalController implements HttpHandler {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
 
-        Handle<String, ?> handle = dispatcher.getHandle(method, path);
+        Handler<String, ?> handler = dispatcher.getHandler(method, path);
 
-        if (handle == null) {
-            sendText(exchange, 404, "Endpoint não encontrado: " + method + " " + path);
+        if (handler == null) {
+            sendText(exchange, 404, "Endpoint not found: " + method + " " + path);
             return;
         }
 
         String body = readBody(exchange);
 
         try {
-            Object resultado = handle.executar(body);
-            sendJson(exchange, 200, resultado);
+            Object result = handler.execute(body);
+            sendJson(exchange, 200, result);
         } catch (Exception e) {
             e.printStackTrace();
-            sendText(exchange, 500, "Erro ao processar requisição: " + e.getMessage());
+            sendText(exchange, 500, "Error processing request: " + e.getMessage());
         }
     }
 

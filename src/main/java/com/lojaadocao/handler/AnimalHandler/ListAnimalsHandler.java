@@ -1,16 +1,17 @@
-package com.lojaadocao.handle;
+package com.lojaadocao.handler.AnimalHandler;
 
 import com.lojaadocao.dao.AnimalDAO;
+import com.lojaadocao.handler.Handler;
 import com.lojaadocao.model.Animal;
 
 import java.util.List;
 
-public class ListarAnimaisHandle implements Handle<Void, List<Animal>> {
+public class ListAnimalsHandler implements Handler<Void, List<Animal>> {
 
     private final AnimalDAO dao = new AnimalDAO();
 
     @Override
-    public List<Animal> executar(Void v) {
+    public List<Animal> execute(Void v) {
         return dao.findAll();
     }
 }

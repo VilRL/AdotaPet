@@ -2,10 +2,10 @@ package com.lojaadocao.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Cachorro extends Animal {
+public class Cat extends Animal {
     @Override
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    public String getTipo() {
-        return "CACHORRO";
+    public String getType() {
+        return "CAT";
     }
 }

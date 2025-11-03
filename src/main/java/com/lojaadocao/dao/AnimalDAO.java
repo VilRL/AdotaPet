@@ -1,9 +1,9 @@
 package com.lojaadocao.dao;
 
 import com.lojaadocao.model.Animal;
-import com.lojaadocao.model.Cachorro;
-import com.lojaadocao.model.Gato;
-import com.lojaadocao.util.ConexaoFactory;
+import com.lojaadocao.model.Cat;
+import com.lojaadocao.model.Dog;
+import com.lojaadocao.util.ConnectionFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,22 +13,22 @@ import java.util.Optional;
 
 public class AnimalDAO {
 
-    public Animal salvar(Animal a) {
-        String sql = "INSERT INTO animais (nome, idade, tipo, raca, sexo, porte, castrado, status, dono_id, chegada_date, created_at, updated_at) " +
+    public Animal save(Animal a) {
+        String sql = "INSERT INTO animals (name, age, type, breed, gender, size, neutered, status, owner_id, arrival_date, created_at, updated_at) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConexaoFactory.getConnection();
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, a.getNome());
-            if (a.getIdade() != null) ps.setInt(2, a.getIdade()); else ps.setNull(2, Types.INTEGER);
-            ps.setString(3, a.getTipo());
-            ps.setString(4, a.getRaca());
-            ps.setString(5, a.getSexo());
-            ps.setString(6, a.getPorte());
-            if (a.getCastrado() != null) ps.setBoolean(7, a.getCastrado()); else ps.setNull(7, Types.BOOLEAN);
-            ps.setString(8, a.getStatus() == null ? "DISPONIVEL" : a.getStatus());
-            if (a.getDonoId() != null) ps.setInt(9, a.getDonoId()); else ps.setNull(9, Types.INTEGER);
-            if (a.getChegadaDate() != null) ps.setDate(10, Date.valueOf(a.getChegadaDate())); else ps.setNull(10, Types.DATE);
+            ps.setString(1, a.getName());
+            if (a.getAge() != null) ps.setInt(2, a.getAge()); else ps.setNull(2, Types.INTEGER);
+            ps.setString(3, a.getType());
+            ps.setString(4, a.getBreed());
+            ps.setString(5, a.getGender());
+            ps.setString(6, a.getSize());
+            if (a.getNeutered() != null) ps.setBoolean(7, a.getNeutered()); else ps.setNull(7, Types.BOOLEAN);
+            ps.setString(8, a.getStatus() == null ? "AVAILABLE" : a.getStatus());
+            if (a.getOwnerId() != null) ps.setInt(9, a.getOwnerId()); else ps.setNull(9, Types.INTEGER);
+            if (a.getArrivalDate() != null) ps.setDate(10, Date.valueOf(a.getArrivalDate())); else ps.setNull(10, Types.DATE);
 
             LocalDateTime now = LocalDateTime.now();
             ps.setTimestamp(11, Timestamp.valueOf(now));
@@ -42,13 +42,13 @@ public class AnimalDAO {
             a.setUpdatedAt(now);
             return a;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar animal", e);
+            throw new RuntimeException("Error saving animal", e);
         }
     }
 
     public Optional<Animal> findById(int id) {
-        String sql = "SELECT * FROM animais WHERE id = ?";
-        try (Connection conn = ConexaoFactory.getConnection();
+        String sql = "SELECT * FROM animals WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
@@ -57,69 +57,69 @@ public class AnimalDAO {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar animal por id", e);
+            throw new RuntimeException("Error finding animal by id", e);
         }
     }
 
     public List<Animal> findAll() {
-        String sql = "SELECT * FROM animais ORDER BY nome";
-        List<Animal> lista = new ArrayList<>();
-        try (Connection conn = ConexaoFactory.getConnection();
+        String sql = "SELECT * FROM animals ORDER BY name";
+        List<Animal> list = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) lista.add(mapRowToAnimal(rs));
-            return lista;
+            while (rs.next()) list.add(mapRowToAnimal(rs));
+            return list;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar animais", e);
+            throw new RuntimeException("Error listing animals", e);
         }
     }
 
-    public List<Animal> listarDisponiveis() {
-        String sql = "SELECT * FROM animais WHERE status = 'DISPONIVEL' ORDER BY chegada_date";
-        List<Animal> lista = new ArrayList<>();
-        try (Connection conn = ConexaoFactory.getConnection();
+    public List<Animal> findAvailable() {
+        String sql = "SELECT * FROM animals WHERE status = 'AVAILABLE' ORDER BY arrival_date";
+        List<Animal> list = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) lista.add(mapRowToAnimal(rs));
-            return lista;
+            while (rs.next()) list.add(mapRowToAnimal(rs));
+            return list;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar animais disponíveis", e);
+            throw new RuntimeException("Error listing available animals", e);
         }
     }
 
-    public List<Animal> listarPorDono(int donoId) {
-        String sql = "SELECT * FROM animais WHERE dono_id = ? ORDER BY data_adocao DESC";
-        List<Animal> lista = new ArrayList<>();
-        try (Connection conn = ConexaoFactory.getConnection();
+    public List<Animal> findByOwner(int ownerId) {
+        String sql = "SELECT * FROM animals WHERE owner_id = ? ORDER BY adoption_date DESC";
+        List<Animal> list = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, donoId);
+            ps.setInt(1, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) lista.add(mapRowToAnimal(rs));
+                while (rs.next()) list.add(mapRowToAnimal(rs));
             }
-            return lista;
+            return list;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar animais do dono", e);
+            throw new RuntimeException("Error listing animals by owner", e);
         }
     }
 
-    public boolean atualizar(Animal a) {
-        String sql = "UPDATE animais SET nome = ?, idade = ?, tipo = ?, raca = ?, sexo = ?, porte = ?, castrado = ?, status = ?, dono_id = ?, chegada_date = ?, updated_at = ? WHERE id = ?";
-        try (Connection conn = ConexaoFactory.getConnection();
+    public boolean update(Animal a) {
+        String sql = "UPDATE animals SET name = ?, age = ?, type = ?, breed = ?, gender = ?, size = ?, neutered = ?, status = ?, owner_id = ?, arrival_date = ?, updated_at = ? WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, a.getNome());
-            if (a.getIdade() != null) ps.setInt(2, a.getIdade()); else ps.setNull(2, Types.INTEGER);
-            ps.setString(3, a.getTipo());
-            ps.setString(4, a.getRaca());
-            ps.setString(5, a.getSexo());
-            ps.setString(6, a.getPorte());
-            if (a.getCastrado() != null) ps.setBoolean(7, a.getCastrado()); else ps.setNull(7, Types.BOOLEAN);
+            ps.setString(1, a.getName());
+            if (a.getAge() != null) ps.setInt(2, a.getAge()); else ps.setNull(2, Types.INTEGER);
+            ps.setString(3, a.getType());
+            ps.setString(4, a.getBreed());
+            ps.setString(5, a.getGender());
+            ps.setString(6, a.getSize());
+            if (a.getNeutered() != null) ps.setBoolean(7, a.getNeutered()); else ps.setNull(7, Types.BOOLEAN);
             ps.setString(8, a.getStatus());
-            if (a.getDonoId() != null) ps.setInt(9, a.getDonoId()); else ps.setNull(9, Types.INTEGER);
-            if (a.getChegadaDate() != null) ps.setDate(10, Date.valueOf(a.getChegadaDate())); else ps.setNull(10, Types.DATE);
+            if (a.getOwnerId() != null) ps.setInt(9, a.getOwnerId()); else ps.setNull(9, Types.INTEGER);
+            if (a.getArrivalDate() != null) ps.setDate(10, Date.valueOf(a.getArrivalDate())); else ps.setNull(10, Types.DATE);
 
             LocalDateTime now = LocalDateTime.now();
             ps.setTimestamp(11, Timestamp.valueOf(now));
@@ -132,31 +132,31 @@ public class AnimalDAO {
             }
             return false;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar animal", e);
+            throw new RuntimeException("Error updating animal", e);
         }
     }
 
-    public boolean deletar(int id) {
-        String sql = "DELETE FROM animais WHERE id = ?";
-        try (Connection conn = ConexaoFactory.getConnection();
+    public boolean delete(int id) {
+        String sql = "DELETE FROM animals WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             int rows = ps.executeUpdate();
             return rows == 1;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao deletar animal", e);
+            throw new RuntimeException("Error deleting animal", e);
         }
     }
 
-    public boolean adotar(int animalId, int donoId) {
-        String sql = "UPDATE animais SET status = ?, dono_id = ?, data_adocao = ?, updated_at = ? WHERE id = ? AND status = 'DISPONIVEL'";
-        try (Connection conn = ConexaoFactory.getConnection();
+    public boolean adopt(int animalId, int ownerId) {
+        String sql = "UPDATE animals SET status = ?, owner_id = ?, adoption_date = ?, updated_at = ? WHERE id = ? AND status = 'AVAILABLE'";
+        try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             LocalDateTime now = LocalDateTime.now();
-            ps.setString(1, "ADOTADO");
-            ps.setInt(2, donoId);
+            ps.setString(1, "ADOPTED");
+            ps.setInt(2, ownerId);
             ps.setTimestamp(3, Timestamp.valueOf(now));
             ps.setTimestamp(4, Timestamp.valueOf(now));
             ps.setInt(5, animalId);
@@ -164,44 +164,44 @@ public class AnimalDAO {
             int rows = ps.executeUpdate();
             return rows == 1;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao adotar animal", e);
+            throw new RuntimeException("Error adopting animal", e);
         }
     }
 
     private Animal mapRowToAnimal(ResultSet rs) throws SQLException {
-        String tipo = rs.getString("tipo");
+        String type = rs.getString("type");
         Animal a;
 
-        switch (tipo.toUpperCase()) {
-            case "CACHORRO":
-                a = new Cachorro();
+        switch (type.toUpperCase()) {
+            case "DOG":
+                a = new Dog();
                 break;
-            case "GATO":
-                a = new Gato();
+            case "CAT":
+                a = new Cat();
                 break;
             default:
-                throw new RuntimeException("Tipo de animal desconhecido: " + tipo);
+                throw new RuntimeException("Unknown animal type: " + type);
         }
 
         a.setId(rs.getInt("id"));
-        a.setNome(rs.getString("nome"));
-        int idade = rs.getInt("idade");
-        if (!rs.wasNull()) a.setIdade(idade);
-        a.setRaca(rs.getString("raca"));
-        a.setSexo(rs.getString("sexo"));
-        a.setPorte(rs.getString("porte"));
-        boolean castradoVal = rs.getBoolean("castrado");
-        if (!rs.wasNull()) a.setCastrado(castradoVal);
+        a.setName(rs.getString("name"));
+        int age = rs.getInt("age");
+        if (!rs.wasNull()) a.setAge(age);
+        a.setBreed(rs.getString("breed"));
+        a.setGender(rs.getString("gender"));
+        a.setSize(rs.getString("size"));
+        boolean neuteredVal = rs.getBoolean("neutered");
+        if (!rs.wasNull()) a.setNeutered(neuteredVal);
         a.setStatus(rs.getString("status"));
 
-        int donoId = rs.getInt("dono_id");
-        if (!rs.wasNull()) a.setDonoId(donoId);
+        int ownerId = rs.getInt("owner_id");
+        if (!rs.wasNull()) a.setOwnerId(ownerId);
 
-        Date chegada = rs.getDate("chegada_date");
-        if (chegada != null) a.setChegadaDate(chegada.toLocalDate());
+        Date arrival = rs.getDate("arrival_date");
+        if (arrival != null) a.setArrivalDate(arrival.toLocalDate());
 
-        Timestamp adotTs = rs.getTimestamp("data_adocao");
-        if (adotTs != null) a.setDataAdocao(adotTs.toLocalDateTime());
+        Timestamp adoptTs = rs.getTimestamp("adoption_date");
+        if (adoptTs != null) a.setAdoptionDate(adoptTs.toLocalDateTime());
 
         Timestamp created = rs.getTimestamp("created_at");
         if (created != null) a.setCreatedAt(created.toLocalDateTime());
@@ -210,6 +210,4 @@ public class AnimalDAO {
 
         return a;
     }
-
-
 }

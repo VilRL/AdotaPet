@@ -12,32 +12,29 @@ import java.time.LocalDateTime;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        property = "tipo",
+        property = "type",
         visible = true
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = Gato.class, name = "GATO"),
-        @JsonSubTypes.Type(value = Cachorro.class, name = "CACHORRO")
+        @JsonSubTypes.Type(value = Cat.class, name = "CAT"),
+        @JsonSubTypes.Type(value = Dog.class, name = "DOG")
 })
 @Data
 @NoArgsConstructor
 public abstract class Animal {
     private Integer id;
-    private String nome;
-    private Integer idade;
-    private String raca;
-    private String sexo;
-    private String porte;
-    private Boolean castrado;
+    private String name;
+    private Integer age;
+    private String breed;
+    private String gender;
+    private String size;
+    private Boolean neutered;
     private String status;
-    private Integer donoId;
-
-    private LocalDate chegadaDate;
-    private LocalDateTime dataAdocao;
-
+    private Integer ownerId;
+    private LocalDate arrivalDate;
+    private LocalDateTime adoptionDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
-    public abstract String getTipo();
+    public abstract String getType();
 }

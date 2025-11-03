@@ -5,54 +5,54 @@ import java.sql.Statement;
 
 public class DatabaseSetup {
 
-    public static void criarTabelas() {
-        try (Connection conn = ConexaoFactory.getConnection();
+    public static void createTables() {
+        try (Connection conn = ConnectionFactory.getConnection();
              Statement stmt = conn.createStatement()) {
 
-            String sqlDonos = "CREATE TABLE IF NOT EXISTS donos (" +
+            String sqlOwners = "CREATE TABLE IF NOT EXISTS owners (" +
                     " id INT AUTO_INCREMENT PRIMARY KEY," +
-                    " nome VARCHAR(100) NOT NULL," +
+                    " name VARCHAR(100) NOT NULL," +
                     " cpf VARCHAR(15) NOT NULL," +
                     " email VARCHAR(50) NOT NULL," +
-                    " dataNascimento TIMESTAMP NOT NULL," +
-                    " telefone VARCHAR(20)," +
-                    " endereco VARCHAR(200)," +
+                    " birth_date TIMESTAMP NOT NULL," +
+                    " phone VARCHAR(20)," +
+                    " address VARCHAR(200)," +
                     " created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
                     " updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                     ")";
 
-            String sqlAnimais = "CREATE TABLE IF NOT EXISTS animais (" +
+            String sqlAnimals = "CREATE TABLE IF NOT EXISTS animals (" +
                     " id INT AUTO_INCREMENT PRIMARY KEY," +
-                    " nome VARCHAR(120) NOT NULL," +
-                    " idade INT," +
-                    " tipo VARCHAR(50) NOT NULL," +
-                    " raca VARCHAR(80)," +
-                    " sexo VARCHAR(5)," +
-                    " porte VARCHAR(20)," +
-                    " castrado BOOLEAN," +
-                    " status VARCHAR(20) DEFAULT 'DISPONIVEL' CHECK (status IN ('DISPONIVEL','ADOTADO','RESERVADO','EM_TRATAMENTO'))," +
-                    " dono_id INT," +
-                    " chegada_date DATE," +
-                    " data_adocao TIMESTAMP," +
+                    " name VARCHAR(120) NOT NULL," +
+                    " age INT," +
+                    " type VARCHAR(50) NOT NULL," +
+                    " breed VARCHAR(80)," +
+                    " gender VARCHAR(5)," +
+                    " size VARCHAR(20)," +
+                    " neutered BOOLEAN," +
+                    " status VARCHAR(20) DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE','ADOPTED','RESERVED','UNDER_TREATMENT'))," +
+                    " owner_id INT," +
+                    " arrival_date DATE," +
+                    " adoption_date TIMESTAMP," +
                     " created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
                     " updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-                    " FOREIGN KEY (dono_id) REFERENCES donos(id)" +
+                    " FOREIGN KEY (owner_id) REFERENCES owners(id)" +
                     ")";
 
-            String idxAnimaisStatus = "CREATE INDEX IF NOT EXISTS idx_animais_status ON animais(status)";
-            String idxAnimaisDono = "CREATE INDEX IF NOT EXISTS idx_animais_dono ON animais(dono_id)";
-            String idxAnimaisTipo = "CREATE INDEX IF NOT EXISTS idx_animais_tipo ON animais(tipo)";
+            String idxAnimalsStatus = "CREATE INDEX IF NOT EXISTS idx_animals_status ON animals(status)";
+            String idxAnimalsOwner = "CREATE INDEX IF NOT EXISTS idx_animals_owner ON animals(owner_id)";
+            String idxAnimalsType = "CREATE INDEX IF NOT EXISTS idx_animals_type ON animals(type)";
 
-            // executar DDLs
-            stmt.execute(sqlDonos);
-            stmt.execute(sqlAnimais);
+            // execute DDLs
+            stmt.execute(sqlOwners);
+            stmt.execute(sqlAnimals);
 
-            // criar índices
-            stmt.execute(idxAnimaisStatus);
-            stmt.execute(idxAnimaisDono);
-            stmt.execute(idxAnimaisTipo);
+            // create indexes
+            stmt.execute(idxAnimalsStatus);
+            stmt.execute(idxAnimalsOwner);
+            stmt.execute(idxAnimalsType);
 
-            System.out.println("Tabelas e índices criados/verificados com sucesso!");
+            System.out.println("Tables and indexes created/verified successfully!");
 
         } catch (Exception e) {
             e.printStackTrace();
