@@ -24,7 +24,7 @@ cd adotapet
 ```bash
 CREATE DATABASE adotapet;
 USE adotapet;
--- rodar CREATE TABLE de animais e owners aqui
+-- rodar CREATE TABLE de animals e owners aqui
 ```
 No arquivo ConexaoFactory.java, configure:
 ```bash
@@ -48,13 +48,13 @@ A API subirá em http://localhost:8080
 ## 🌐 Endpoints disponíveis
 
 ### 🐶 Animal
-- **POST /animais** → Cadastrar um animal  
-- **GET /animais** → Listar todos os animais  
-- **GET /animais/disponiveis** → Listar apenas os animais disponíveis  
-- **GET /animais/{id}** → Buscar um animal por ID  
-- **PUT /animais/{id}** → Atualizar informações de um animal  
-- **DELETE /animais/{id}** → Excluir um animal  
-- **POST /animais/adotar** → Adotar um animal (informando owner e animal)  
+- **POST /animals** → Cadastrar um animal  
+- **GET /animals** → Listar todos os animais  
+- **GET /animals/disponiveis** → Listar apenas os animais disponíveis  
+- **GET /animals/{id}** → Buscar um animal por ID  
+- **PUT /animals/{id}** → Atualizar informações de um animal  
+- **DELETE /animals/{id}** → Excluir um animal  
+- **POST /animals/adotar** → Adotar um animal (informando owner e animal)  
 
 ### 👤 Dono
 - **POST /owners** → Cadastrar um owner  
