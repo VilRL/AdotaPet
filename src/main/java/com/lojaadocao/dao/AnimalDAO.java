@@ -4,6 +4,7 @@ import com.lojaadocao.model.Animal;
 import com.lojaadocao.model.Cat;
 import com.lojaadocao.model.Dog;
 import com.lojaadocao.util.ConnectionFactory;
+import com.lojaadocao.util.Logger;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -14,8 +15,8 @@ import java.util.Optional;
 public class AnimalDAO {
 
     public Animal save(Animal a) {
-        String sql = "INSERT INTO animals (name, age, type, breed, gender, size, neutered, status, owner_id, arrival_date, created_at, updated_at) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO animals (name, age, type, breed, gender, size, neutered, status, owner_id, arrival_date, dog_breed_group, cat_coat_type, created_at, updated_at) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -30,9 +31,20 @@ public class AnimalDAO {
             if (a.getOwnerId() != null) ps.setInt(9, a.getOwnerId()); else ps.setNull(9, Types.INTEGER);
             if (a.getArrivalDate() != null) ps.setDate(10, Date.valueOf(a.getArrivalDate())); else ps.setNull(10, Types.DATE);
 
+            if (a instanceof Dog) {
+                ps.setString(11, ((Dog) a).getBreedGroup());
+                ps.setNull(12, Types.VARCHAR);
+            } else if (a instanceof Cat) {
+                ps.setNull(11, Types.VARCHAR);
+                ps.setString(12, ((Cat) a).getCoatType());
+            } else {
+                ps.setNull(11, Types.VARCHAR);
+                ps.setNull(12, Types.VARCHAR);
+            }
+
             LocalDateTime now = LocalDateTime.now();
-            ps.setTimestamp(11, Timestamp.valueOf(now));
-            ps.setTimestamp(12, Timestamp.valueOf(now));
+            ps.setTimestamp(13, Timestamp.valueOf(now));
+            ps.setTimestamp(14, Timestamp.valueOf(now));
 
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -42,6 +54,7 @@ public class AnimalDAO {
             a.setUpdatedAt(now);
             return a;
         } catch (SQLException e) {
+            Logger.error("Error saving animal", e);
             throw new RuntimeException("Error saving animal", e);
         }
     }
@@ -106,7 +119,7 @@ public class AnimalDAO {
     }
 
     public boolean update(Animal a) {
-        String sql = "UPDATE animals SET name = ?, age = ?, type = ?, breed = ?, gender = ?, size = ?, neutered = ?, status = ?, owner_id = ?, arrival_date = ?, updated_at = ? WHERE id = ?";
+        String sql = "UPDATE animals SET name = ?, age = ?, type = ?, breed = ?, gender = ?, size = ?, neutered = ?, status = ?, owner_id = ?, arrival_date = ?, dog_breed_group = ?, cat_coat_type = ?, updated_at = ? WHERE id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -121,9 +134,21 @@ public class AnimalDAO {
             if (a.getOwnerId() != null) ps.setInt(9, a.getOwnerId()); else ps.setNull(9, Types.INTEGER);
             if (a.getArrivalDate() != null) ps.setDate(10, Date.valueOf(a.getArrivalDate())); else ps.setNull(10, Types.DATE);
 
+            // Novos atributos específicos
+            if (a instanceof Dog) {
+                ps.setString(11, ((Dog) a).getBreedGroup());
+                ps.setNull(12, Types.VARCHAR);
+            } else if (a instanceof Cat) {
+                ps.setNull(11, Types.VARCHAR);
+                ps.setString(12, ((Cat) a).getCoatType());
+            } else {
+                ps.setNull(11, Types.VARCHAR);
+                ps.setNull(12, Types.VARCHAR);
+            }
+
             LocalDateTime now = LocalDateTime.now();
-            ps.setTimestamp(11, Timestamp.valueOf(now));
-            ps.setInt(12, a.getId());
+            ps.setTimestamp(13, Timestamp.valueOf(now));
+            ps.setInt(14, a.getId());
 
             int rows = ps.executeUpdate();
             if (rows == 1) {
@@ -132,6 +157,7 @@ public class AnimalDAO {
             }
             return false;
         } catch (SQLException e) {
+            Logger.error("Error updating animal", e);
             throw new RuntimeException("Error updating animal", e);
         }
     }
@@ -174,10 +200,14 @@ public class AnimalDAO {
 
         switch (type.toUpperCase()) {
             case "DOG":
-                a = new Dog();
+                Dog dog = new Dog();
+                dog.setBreedGroup(rs.getString("dog_breed_group"));
+                a = dog;
                 break;
             case "CAT":
-                a = new Cat();
+                Cat cat = new Cat();
+                cat.setCoatType(rs.getString("cat_coat_type"));
+                a = cat;
                 break;
             default:
                 throw new RuntimeException("Unknown animal type: " + type);
